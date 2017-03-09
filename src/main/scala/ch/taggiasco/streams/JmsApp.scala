@@ -13,7 +13,7 @@ import scala.util.{Success, Failure}
 import org.apache.activemq.ActiveMQConnectionFactory
 
 
-object JmsApp {
+object JmsApp extends Config {
 
   def main(args: Array[String]): Unit = {
     // actor system and implicit materializer
@@ -21,13 +21,10 @@ object JmsApp {
     implicit val materializer = ActorMaterializer()
     implicit val executionContext = materializer.executionContext
     
-    val url = "vm://localhost"
-    val queueName = "test-03-2017"
-    
-    val connectionFactory = new ActiveMQConnectionFactory(url)
+    val connectionFactory = new ActiveMQConnectionFactory(jmsUrl)
     
     val jmsSink: Sink[String, NotUsed] = JmsSink(
-      JmsSinkSettings(connectionFactory).withQueue(queueName)
+      JmsSinkSettings(connectionFactory).withQueue(jmsQueueName)
     )
     
     //val numbers = Source.fromIterator(() => Iterator.continually(Random.nextInt()))
@@ -39,7 +36,7 @@ object JmsApp {
     
     
     val jmsSource: Source[String, NotUsed] = JmsSource.textSource(
-      JmsSourceSettings(connectionFactory).withBufferSize(10).withQueue(queueName)
+      JmsSourceSettings(connectionFactory).withBufferSize(10).withQueue(jmsQueueName)
     )
     
     val result = jmsSource.take(in.size).runWith(Sink.seq)
