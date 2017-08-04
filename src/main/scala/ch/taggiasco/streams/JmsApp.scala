@@ -23,7 +23,7 @@ object JmsApp extends Config {
     
     val connectionFactory = new ActiveMQConnectionFactory(jmsUrl)
     
-    val jmsSink: Sink[String, NotUsed] = JmsSink(
+    val jmsSink: Sink[String, NotUsed] = JmsSink.textSink(
       JmsSinkSettings(connectionFactory).withQueue(jmsQueueName)
     )
     
@@ -45,6 +45,8 @@ object JmsApp extends Config {
       case Success(strs) => println("Result: " + strs)
       case Failure(e)    => println("Error: " + e.getMessage)
     }
+    
+    result.onComplete( _ => system.terminate() )
     
   }
 }
